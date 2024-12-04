@@ -42,6 +42,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 uint8_t sensor1_crossed = 0;
+uint16_t timerBB;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,6 +57,7 @@ uint8_t sensor1_crossed = 0;
 
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim6;
+extern TIM_HandleTypeDef htim7;
 extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
 extern int16_t time;
@@ -208,9 +210,9 @@ void EXTI1_IRQHandler(void)
   /* USER CODE BEGIN EXTI1_IRQn 0 */
 
   /* USER CODE END EXTI1_IRQn 0 */
-	HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
-	if (sensor1_crossed == 0) {
+	if (sensor1_crossed == 0 && __HAL_TIM_GET_COUNTER(&htim7) == 0) {
 		TIM6->CNT = 0;
 		HAL_TIM_Base_Start(&htim6);
 		sensor1_crossed = 1;
@@ -230,6 +232,7 @@ void EXTI4_IRQHandler(void)
   /* USER CODE BEGIN EXTI4_IRQn 1 */
   if (sensor1_crossed == 1) {
 	  HAL_TIM_Base_Stop(&htim6);
+	  HAL_TIM_Base_Start_IT(&htim7);
 	  time = TIM6->CNT;
 	  sensor1_crossed = 0;
   }
@@ -263,6 +266,22 @@ void TIM6_DAC1_IRQHandler(void)
   /* USER CODE BEGIN TIM6_DAC1_IRQn 1 */
 
   /* USER CODE END TIM6_DAC1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM7 global and DAC2 underrun error interrupts.
+  */
+void TIM7_DAC2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_DAC2_IRQn 0 */
+
+  /* USER CODE END TIM7_DAC2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim7);
+  HAL_TIM_Base_Stop(&htim7);
+
+  /* USER CODE BEGIN TIM7_DAC2_IRQn 1 */
+
+  /* USER CODE END TIM7_DAC2_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
