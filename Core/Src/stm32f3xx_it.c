@@ -62,6 +62,7 @@ extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
 extern int16_t time;
 extern TIM_HandleTypeDef htim6;
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -212,8 +213,8 @@ void EXTI1_IRQHandler(void)
   /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
   /* USER CODE BEGIN EXTI1_IRQn 1 */
-	if (sensor1_crossed == 0 && __HAL_TIM_GET_COUNTER(&htim7) == 0) {
-		TIM6->CNT = 0;
+	if (sensor1_crossed == 0 && TIM7->CNT == 0) {
+		//TIM6->CNT = 0;
 		HAL_TIM_Base_Start(&htim6);
 		sensor1_crossed = 1;
 	}
@@ -264,6 +265,11 @@ void TIM6_DAC1_IRQHandler(void)
   /* USER CODE END TIM6_DAC1_IRQn 0 */
   HAL_TIM_IRQHandler(&htim6);
   /* USER CODE BEGIN TIM6_DAC1_IRQn 1 */
+  HAL_TIM_Base_Stop(&htim6);
+  sensor1_crossed=0;
+  TIM6->CNT =0;
+//
+//
 
   /* USER CODE END TIM6_DAC1_IRQn 1 */
 }
@@ -277,10 +283,9 @@ void TIM7_DAC2_IRQHandler(void)
 
   /* USER CODE END TIM7_DAC2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim7);
-  HAL_TIM_Base_Stop(&htim7);
-
   /* USER CODE BEGIN TIM7_DAC2_IRQn 1 */
-
+  HAL_TIM_Base_Stop(&htim7);
+  TIM7->CNT = 0;
   /* USER CODE END TIM7_DAC2_IRQn 1 */
 }
 
