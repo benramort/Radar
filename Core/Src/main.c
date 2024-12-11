@@ -47,6 +47,9 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 volatile int16_t time = 0;
+volatile uint8_t maxSpeed = 5;
+uint8_t receiveBufferSize = 2;
+char receiveBuffer[10];
 float distance = 5; //metros
 /* USER CODE END PV */
 
@@ -101,6 +104,9 @@ int main(void)
   char* saludo = "Nueva sesion:\n\r";
   HAL_UART_Transmit_IT(&huart2, (uint8_t*) saludo, strlen(saludo));
   HAL_TIM_Base_Start_IT(&htim6);
+
+
+  HAL_UART_Receive_IT(&huart2, receiveBuffer, receiveBufferSize);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -110,7 +116,8 @@ int main(void)
 	  if (time != 0) {
 		  char buffer[20];
 		  float speed = calculate_speed(time);
-		  sprintf(buffer, "%ds - %.3fcm/s\n\r", time, speed);
+		  uint8_t isSpeeding = speed > maxSpeed;
+		  sprintf(buffer, "%ds - %.3fcm/s - %d - %d\n\r", time, speed, isSpeeding, maxSpeed);
 		  HAL_UART_Transmit_IT(&huart2, (uint8_t*) buffer, strlen(buffer));
 		  time = 0;
 	  }
@@ -285,10 +292,20 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : PB1 PB4 */
   GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_4;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
@@ -304,9 +321,16 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 float calculate_speed(int16_t time)  {
-	time /= 1000;
-	float speed = distance / time;
+	float newTime = ((float)time) / 1000;
+	float speed = distance / newTime;
+	return speed;
 }
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	maxSpeed = atoi(receiveBuffer);
+	HAL_UART_Receive_IT(&huart2, receiveBuffer, receiveBufferSize);
+}
+
 /* USER CODE END 4 */
 
 /**
