@@ -40,6 +40,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim7;
 
@@ -47,7 +48,7 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 volatile int16_t time = 0;
-volatile uint8_t maxSpeed = 5;
+volatile uint8_t maxSpeed = 0;
 uint8_t receiveBufferSize = 2;
 char receiveBuffer[10];
 float distance = 5; //metros
@@ -59,6 +60,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM6_Init(void);
 static void MX_TIM7_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 float calculate_speed(int16_t time);
 /* USER CODE END PFP */
@@ -100,6 +102,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM6_Init();
   MX_TIM7_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   char* saludo = "Nueva sesion:\n\r";
   HAL_UART_Transmit_IT(&huart2, (uint8_t*) saludo, strlen(saludo));
@@ -117,7 +120,11 @@ int main(void)
 		  char buffer[20];
 		  float speed = calculate_speed(time);
 		  uint8_t isSpeeding = speed > maxSpeed;
-		  sprintf(buffer, "%ds - %.3fcm/s - %d - %d\n\r", time, speed, isSpeeding, maxSpeed);
+		  if (isSpeeding) {
+			  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1);
+			  HAL_TIM_Base_Start_IT(&htim3);
+		  }
+		  sprintf(buffer, "%ds-%.3fcm/s-%d\n\r", time, speed, isSpeeding);
 		  HAL_UART_Transmit_IT(&huart2, (uint8_t*) buffer, strlen(buffer));
 		  time = 0;
 	  }
@@ -163,6 +170,51 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 7999;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 499;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
 }
 
 /**
