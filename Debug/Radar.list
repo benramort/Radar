@@ -29,9 +29,9 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  12 .ARM.attributes 00000030  00000000  00000000  0000a1dc  2**0
                   CONTENTS, READONLY
- 13 .debug_info   0000f588  00000000  00000000  0000a20c  2**0
+ 13 .debug_info   0000f583  00000000  00000000  0000a20c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 000020f3  00000000  00000000  00019794  2**0
+ 14 .debug_abbrev 000020f3  00000000  00000000  0001978f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_aranges 00000d88  00000000  00000000  0001b888  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -1021,8 +1021,8 @@ int main(void)
  8000c0c:	ed87 0a06 	vstr	s0, [r7, #24]
 		  uint8_t isSpeeding = speed > maxSpeed;
  8000c10:	4b24      	ldr	r3, [pc, #144]	@ (8000ca4 <main+0xfc>)
- 8000c12:	781b      	ldrb	r3, [r3, #0]
- 8000c14:	b2db      	uxtb	r3, r3
+ 8000c12:	881b      	ldrh	r3, [r3, #0]
+ 8000c14:	b29b      	uxth	r3, r3
  8000c16:	ee07 3a90 	vmov	s15, r3
  8000c1a:	eef8 7ae7 	vcvt.f32.s32	s15, s15
  8000c1e:	ed97 7a06 	vldr	s14, [r7, #24]
@@ -1706,13 +1706,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
  800102a:	b082      	sub	sp, #8
  800102c:	af00      	add	r7, sp, #0
  800102e:	6078      	str	r0, [r7, #4]
+
 	maxSpeed = atoi(receiveBuffer);
  8001030:	4808      	ldr	r0, [pc, #32]	@ (8001054 <HAL_UART_RxCpltCallback+0x2c>)
  8001032:	f004 f83a 	bl	80050aa <atoi>
  8001036:	4603      	mov	r3, r0
- 8001038:	b2da      	uxtb	r2, r3
+ 8001038:	b29a      	uxth	r2, r3
  800103a:	4b07      	ldr	r3, [pc, #28]	@ (8001058 <HAL_UART_RxCpltCallback+0x30>)
- 800103c:	701a      	strb	r2, [r3, #0]
+ 800103c:	801a      	strh	r2, [r3, #0]
 	HAL_UART_Receive_IT(&huart2, receiveBuffer, receiveBufferSize);
  800103e:	4b07      	ldr	r3, [pc, #28]	@ (800105c <HAL_UART_RxCpltCallback+0x34>)
  8001040:	781b      	ldrb	r3, [r3, #0]

@@ -7,4 +7,4 @@
 ../Core/Src/main.c:336:13:MX_GPIO_Init	1
 ../Core/Src/main.c:375:7:calculate_speed	1
 ../Core/Src/main.c:381:6:HAL_UART_RxCpltCallback	1
-../Core/Src/main.c:392:6:Error_Handler	1
+../Core/Src/main.c:393:6:Error_Handler	1

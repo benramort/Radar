@@ -48,8 +48,8 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 volatile int16_t time = 0;
-volatile uint8_t maxSpeed = 0;
-uint8_t receiveBufferSize = 2;
+volatile uint16_t maxSpeed = 0;
+uint8_t receiveBufferSize = 10;
 char receiveBuffer[10];
 float distance = 5; //metros
 /* USER CODE END PV */
@@ -379,6 +379,7 @@ float calculate_speed(int16_t time)  {
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+
 	maxSpeed = atoi(receiveBuffer);
 	HAL_UART_Receive_IT(&huart2, receiveBuffer, receiveBufferSize);
 }
